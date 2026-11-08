@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4efe7" />
+    <title>Reading Rhythm</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to dashboard</a>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Personal reading dashboard</p>
+        <h1>Reading Rhythm</h1>
+        <p class="header-copy">Keep the books you care about moving, one session at a time.</p>
+      </div>
+      <div class="week-badge" aria-label="Current reporting week">
+        <span>This week</span>
+        <strong>2–8 Nov</strong>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section aria-labelledby="overview-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Overview</p>
+            <h2 id="overview-heading">Your week in pages</h2>
+          </div>
+        </div>
+        <div class="summary-grid" id="summary-grid"></div>
+      </section>
+
+      <section aria-labelledby="current-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">In progress</p>
+            <h2 id="current-heading">Currently reading</h2>
+          </div>
+          <p class="section-note">Progress is based on the latest page saved.</p>
+        </div>
+        <div class="book-grid" id="current-reads"></div>
+      </section>
+
+      <section aria-labelledby="history-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Reading log</p>
+            <h2 id="history-heading">Recent sessions</h2>
+          </div>
+          <p class="section-note" id="session-count"></p>
+        </div>
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Book</th>
+                <th scope="col">Genre</th>
+                <th scope="col">Pages</th>
+                <th scope="col">Time</th>
+              </tr>
+            </thead>
+            <tbody id="session-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Sample data stays in your browser. Built for calm, consistent reading.</p>
+    </footer>
+  </body>
+</html>
+

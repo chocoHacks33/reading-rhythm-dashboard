@@ -1,0 +1,11 @@
+{
+  "name": "reading-rhythm-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A dependency-free dashboard for tracking reading progress and recent sessions.",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check app.js && node --check tests/app.test.js"
+  }
+}
+
