@@ -6,6 +6,7 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  filterSessionsByGenre,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +48,25 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("filters sessions by genre without mutating the source list", () => {
+  const sessions = [
+    { title: "A", genre: "Fiction" },
+    { title: "B", genre: "Science" },
+    { title: "C", genre: "fiction" },
+  ];
+  assert.deepEqual(
+    filterSessionsByGenre(sessions, "Fiction").map((session) => session.title),
+    ["A", "C"],
+  );
+  assert.equal(sessions.length, 3);
+});
+
+test("returns all sessions when the all-genres option is selected", () => {
+  const sessions = [{ genre: "Essays" }, { genre: "Science" }];
+  const result = filterSessionsByGenre(sessions, "all");
+  assert.deepEqual(result, sessions);
+  assert.notEqual(result, sessions);
 });
 

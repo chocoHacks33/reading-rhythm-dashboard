@@ -44,6 +44,15 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function filterSessionsByGenre(sessions, genre) {
+  const safeSessions = Array.isArray(sessions) ? sessions : [];
+  if (!genre || genre === "all") return [...safeSessions];
+  const normalizedGenre = String(genre).trim().toLocaleLowerCase();
+  return safeSessions.filter(
+    (session) => String(session.genre || "").trim().toLocaleLowerCase() === normalizedGenre,
+  );
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -122,10 +131,27 @@ function renderSessions(sessions) {
   if (count) count.textContent = `${sessions.length} sessions logged`;
 }
 
+function initGenreFilter(sessions) {
+  const select = document.querySelector("#genre-filter");
+  if (!select) return;
+  const genres = [...new Set(sessions.map((session) => session.genre).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+  genres.forEach((genre) => {
+    const option = createElement("option", "", genre);
+    option.value = genre;
+    select.append(option);
+  });
+  select.addEventListener("change", () => {
+    renderSessions(filterSessionsByGenre(sessions, select.value));
+  });
+}
+
 function initDashboard() {
   renderSummary(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
+  initGenreFilter(readingSessions);
 }
 
 if (typeof document !== "undefined") {
@@ -140,6 +166,7 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    filterSessionsByGenre,
   };
 }
 
