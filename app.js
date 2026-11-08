@@ -44,6 +44,33 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function calculateReadingStreak(sessions) {
+  const uniqueDays = new Set();
+  (Array.isArray(sessions) ? sessions : []).forEach((session) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(session.date || ""));
+    if (!match) return;
+    const timestamp = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    const parsed = new Date(timestamp);
+    if (
+      parsed.getUTCFullYear() === Number(match[1]) &&
+      parsed.getUTCMonth() === Number(match[2]) - 1 &&
+      parsed.getUTCDate() === Number(match[3])
+    ) {
+      uniqueDays.add(timestamp);
+    }
+  });
+  const days = [...uniqueDays].sort((a, b) => b - a);
+  if (!days.length) return { days: 0, latestDate: null };
+
+  let streak = 1;
+  const oneDay = 24 * 60 * 60 * 1000;
+  for (let index = 1; index < days.length; index += 1) {
+    if (days[index - 1] - days[index] !== oneDay) break;
+    streak += 1;
+  }
+  return { days: streak, latestDate: new Date(days[0]).toISOString().slice(0, 10) };
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -122,10 +149,22 @@ function renderSessions(sessions) {
   if (count) count.textContent = `${sessions.length} sessions logged`;
 }
 
+function renderReadingStreak(sessions) {
+  const days = document.querySelector("#streak-days");
+  const note = document.querySelector("#streak-note");
+  if (!days || !note) return;
+  const streak = calculateReadingStreak(sessions);
+  days.textContent = `${streak.days} ${streak.days === 1 ? "day" : "days"}`;
+  note.textContent = streak.latestDate
+    ? `The latest run ends on ${formatDate(streak.latestDate)}.`
+    : "Log sessions on consecutive days to build momentum.";
+}
+
 function initDashboard() {
   renderSummary(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
+  renderReadingStreak(readingSessions);
 }
 
 if (typeof document !== "undefined") {
@@ -140,6 +179,7 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    calculateReadingStreak,
   };
 }
 

@@ -6,6 +6,7 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  calculateReadingStreak,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +48,31 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("counts the consecutive run ending at the latest reading day", () => {
+  const result = calculateReadingStreak([
+    { date: "2026-11-07" },
+    { date: "2026-11-06" },
+    { date: "2026-11-06" },
+    { date: "2026-11-05" },
+    { date: "2026-11-03" },
+  ]);
+  assert.deepEqual(result, { days: 3, latestDate: "2026-11-07" });
+});
+
+test("ignores invalid dates and handles an empty reading log", () => {
+  assert.deepEqual(calculateReadingStreak([{ date: "2026-02-30" }, { date: "later" }]), {
+    days: 0,
+    latestDate: null,
+  });
+  assert.deepEqual(calculateReadingStreak(null), { days: 0, latestDate: null });
+});
+
+test("does not depend on the input session order", () => {
+  assert.equal(
+    calculateReadingStreak([{ date: "2026-11-02" }, { date: "2026-11-04" }, { date: "2026-11-03" }]).days,
+    3,
+  );
 });
 
