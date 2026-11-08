@@ -33,6 +33,37 @@
         <div class="summary-grid" id="summary-grid"></div>
       </section>
 
+      <section aria-labelledby="goal-heading">
+        <div class="goal-card">
+          <div class="goal-copy">
+            <p class="eyebrow">Monthly intention</p>
+            <h2 id="goal-heading">Reading goal</h2>
+            <p id="goal-summary">Set a page target for this month.</p>
+          </div>
+          <div class="goal-control">
+            <label for="monthly-goal">Page target</label>
+            <input id="monthly-goal" type="number" min="1" max="10000" step="25" value="500" />
+          </div>
+          <div class="goal-progress">
+            <div class="book-meta">
+              <span id="goal-month">This month</span>
+              <strong id="goal-percent">0%</strong>
+            </div>
+            <div
+              class="progress-track"
+              id="goal-track"
+              role="progressbar"
+              aria-label="Monthly reading goal progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div class="progress-bar" id="goal-bar"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section aria-labelledby="current-heading">
         <div class="section-heading">
           <div>

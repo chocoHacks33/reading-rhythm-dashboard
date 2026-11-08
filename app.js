@@ -12,6 +12,8 @@ const readingSessions = [
   { date: "2026-11-02", title: "The Art of Statistics", author: "David Spiegelhalter", genre: "Science", pages: 24, minutes: 39 },
 ];
 
+const MONTHLY_GOAL_KEY = "reading-rhythm-monthly-goal";
+
 function progressPercent(book) {
   if (!book || !Number.isFinite(book.totalPages) || book.totalPages <= 0) return 0;
   const currentPage = Number.isFinite(book.currentPage) ? book.currentPage : 0;
@@ -42,6 +44,25 @@ function formatDate(dateValue) {
   const date = new Date(`${dateValue}T12:00:00`);
   if (Number.isNaN(date.getTime())) return "Unknown date";
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
+}
+
+function pagesReadInMonth(sessions, referenceDate) {
+  const reference = referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
+  if (Number.isNaN(reference.getTime())) return 0;
+  return (Array.isArray(sessions) ? sessions : []).reduce((total, session) => {
+    const sessionDate = new Date(`${session.date}T12:00:00`);
+    const isSameMonth =
+      !Number.isNaN(sessionDate.getTime()) &&
+      sessionDate.getFullYear() === reference.getFullYear() &&
+      sessionDate.getMonth() === reference.getMonth();
+    return total + (isSameMonth ? Math.max(Number(session.pages) || 0, 0) : 0);
+  }, 0);
+}
+
+function goalProgressPercent(pages, goal) {
+  const safeGoal = Number(goal);
+  if (!Number.isFinite(safeGoal) || safeGoal <= 0) return 0;
+  return Math.round(Math.min(Math.max((Number(pages) || 0) / safeGoal, 0), 1) * 100);
 }
 
 function createElement(tagName, className, text) {
@@ -122,10 +143,41 @@ function renderSessions(sessions) {
   if (count) count.textContent = `${sessions.length} sessions logged`;
 }
 
+function initMonthlyGoal(sessions) {
+  const input = document.querySelector("#monthly-goal");
+  const summary = document.querySelector("#goal-summary");
+  const month = document.querySelector("#goal-month");
+  const percentLabel = document.querySelector("#goal-percent");
+  const track = document.querySelector("#goal-track");
+  const bar = document.querySelector("#goal-bar");
+  if (!input || !summary || !month || !percentLabel || !track || !bar) return;
+
+  const now = new Date();
+  const pages = pagesReadInMonth(sessions, now);
+  const storedGoal = Number(window.localStorage.getItem(MONTHLY_GOAL_KEY));
+  if (Number.isFinite(storedGoal) && storedGoal > 0) input.value = String(storedGoal);
+
+  const updateGoal = () => {
+    const goal = Math.min(Math.max(Number(input.value) || 1, 1), 10000);
+    input.value = String(goal);
+    window.localStorage.setItem(MONTHLY_GOAL_KEY, String(goal));
+    const percent = goalProgressPercent(pages, goal);
+    summary.textContent = `${pages} of ${goal} pages read`;
+    month.textContent = new Intl.DateTimeFormat("en-SG", { month: "long" }).format(now);
+    percentLabel.textContent = `${percent}%`;
+    track.setAttribute("aria-valuenow", String(percent));
+    bar.style.width = `${percent}%`;
+  };
+
+  input.addEventListener("change", updateGoal);
+  updateGoal();
+}
+
 function initDashboard() {
   renderSummary(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
+  initMonthlyGoal(readingSessions);
 }
 
 if (typeof document !== "undefined") {
@@ -140,6 +192,8 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    pagesReadInMonth,
+    goalProgressPercent,
   };
 }
 

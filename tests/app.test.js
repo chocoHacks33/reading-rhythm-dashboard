@@ -6,6 +6,8 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  pagesReadInMonth,
+  goalProgressPercent,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +49,21 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("totals only pages read in the selected month", () => {
+  const sessions = [
+    { date: "2026-11-01", pages: 30 },
+    { date: "2026-11-28", pages: 25 },
+    { date: "2026-10-31", pages: 90 },
+    { date: "2025-11-04", pages: 70 },
+  ];
+  assert.equal(pagesReadInMonth(sessions, new Date("2026-11-08T12:00:00")), 55);
+});
+
+test("calculates and caps monthly goal progress", () => {
+  assert.equal(goalProgressPercent(125, 500), 25);
+  assert.equal(goalProgressPercent(650, 500), 100);
+  assert.equal(goalProgressPercent(100, 0), 0);
 });
 
