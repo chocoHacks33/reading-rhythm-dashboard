@@ -220,6 +220,13 @@ main {
   background: var(--green);
 }
 
+.pace-note {
+  margin: 0.85rem 0 0;
+  color: var(--green);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .table-shell {
   overflow-x: auto;
   border-radius: 1rem;

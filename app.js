@@ -44,6 +44,41 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function calculateDailyPace(sessions, referenceDate, windowDays = 7) {
+  const reference = referenceDate instanceof Date ? new Date(referenceDate) : new Date(referenceDate);
+  const safeWindow = Math.floor(Number(windowDays));
+  if (Number.isNaN(reference.getTime()) || safeWindow <= 0) return 0;
+  reference.setHours(12, 0, 0, 0);
+  const start = new Date(reference);
+  start.setDate(start.getDate() - safeWindow + 1);
+  const pages = (Array.isArray(sessions) ? sessions : []).reduce((total, session) => {
+    const sessionDate = new Date(`${session.date}T12:00:00`);
+    const inWindow =
+      !Number.isNaN(sessionDate.getTime()) && sessionDate >= start && sessionDate <= reference;
+    return total + (inWindow ? Math.max(Number(session.pages) || 0, 0) : 0);
+  }, 0);
+  return Math.round((pages / safeWindow) * 10) / 10;
+}
+
+function forecastFinish(book, pagesPerDay, referenceDate) {
+  const pace = Number(pagesPerDay);
+  const reference = referenceDate instanceof Date ? new Date(referenceDate) : new Date(referenceDate);
+  if (!book || !Number.isFinite(pace) || pace <= 0 || Number.isNaN(reference.getTime())) return null;
+  const remainingPages = Math.max((Number(book.totalPages) || 0) - (Number(book.currentPage) || 0), 0);
+  const days = Math.ceil(remainingPages / pace);
+  reference.setHours(12, 0, 0, 0);
+  reference.setDate(reference.getDate() + days);
+  return { days, date: reference.toISOString().slice(0, 10) };
+}
+
+function latestSessionDate(sessions) {
+  const dates = (Array.isArray(sessions) ? sessions : [])
+    .map((session) => new Date(`${session.date}T12:00:00`))
+    .filter((date) => !Number.isNaN(date.getTime()))
+    .sort((a, b) => b - a);
+  return dates[0] || null;
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -70,10 +105,12 @@ function renderSummary(sessions) {
   });
 }
 
-function renderCurrentReads(books) {
+function renderCurrentReads(books, sessions) {
   const container = document.querySelector("#current-reads");
   if (!container) return;
   container.replaceChildren();
+  const referenceDate = latestSessionDate(sessions);
+  const pace = referenceDate ? calculateDailyPace(sessions, referenceDate, 7) : 0;
   books.forEach((book) => {
     const percent = progressPercent(book);
     const card = createElement("article", "book-card");
@@ -95,6 +132,11 @@ function renderCurrentReads(books) {
     track.append(bar);
 
     card.append(meta, track);
+    const forecast = forecastFinish(book, pace, referenceDate);
+    if (forecast) {
+      const timing = forecast.days === 0 ? "Already complete" : `Finish around ${formatDate(forecast.date)}`;
+      card.append(createElement("p", "pace-note", `${timing} at ${pace} pages/day`));
+    }
     container.append(card);
   });
 }
@@ -124,7 +166,7 @@ function renderSessions(sessions) {
 
 function initDashboard() {
   renderSummary(readingSessions);
-  renderCurrentReads(currentReads);
+  renderCurrentReads(currentReads, readingSessions);
   renderSessions(readingSessions);
 }
 
@@ -140,6 +182,8 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    calculateDailyPace,
+    forecastFinish,
   };
 }
 
