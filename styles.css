@@ -225,6 +225,35 @@ main {
   border-radius: 1rem;
 }
 
+.history-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin: -0.35rem 0 0.9rem;
+}
+
+.history-controls label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.history-controls select {
+  min-width: 10rem;
+  padding: 0.6rem 2rem 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.history-controls select:focus-visible {
+  outline: 3px solid rgba(47, 111, 84, 0.25);
+  outline-offset: 2px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -296,6 +325,11 @@ footer p {
 
   .section-note {
     text-align: left;
+  }
+
+  .history-controls {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .summary-grid {
