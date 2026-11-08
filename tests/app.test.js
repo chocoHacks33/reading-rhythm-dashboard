@@ -6,6 +6,8 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  escapeCsvCell,
+  buildSessionsCsv,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +49,33 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("escapes quotes and formula-like values in CSV cells", () => {
+  assert.equal(escapeCsvCell('A "quoted" title'), '"A ""quoted"" title"');
+  assert.equal(escapeCsvCell("=IMPORTXML('x')"), '"\'=IMPORTXML(\'x\')"');
+  assert.equal(escapeCsvCell("  +SUM(1,2)"), '"\'  +SUM(1,2)"');
+});
+
+test("builds a complete reading-session CSV", () => {
+  const csv = buildSessionsCsv([
+    {
+      date: "2026-11-07",
+      title: "North Woods",
+      author: "Daniel Mason",
+      genre: "Fiction",
+      pages: 32,
+      minutes: 41,
+    },
+  ]);
+  const lines = csv.split("\r\n");
+  assert.equal(lines.length, 2);
+  assert.equal(lines[0], '"Date","Title","Author","Genre","Pages","Minutes"');
+  assert.match(lines[1], /"North Woods"/);
+  assert.match(lines[1], /"32","41"$/);
+});
+
+test("exports only the header row for an empty reading log", () => {
+  assert.equal(buildSessionsCsv([]), '"Date","Title","Author","Genre","Pages","Minutes"');
 });
 

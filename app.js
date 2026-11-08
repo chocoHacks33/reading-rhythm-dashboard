@@ -44,6 +44,25 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function escapeCsvCell(value) {
+  let text = String(value ?? "");
+  if (/^[=+\-@]/.test(text.trimStart())) text = `'${text}`;
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function buildSessionsCsv(sessions) {
+  const headings = ["Date", "Title", "Author", "Genre", "Pages", "Minutes"];
+  const rows = (Array.isArray(sessions) ? sessions : []).map((session) => [
+    session.date,
+    session.title,
+    session.author,
+    session.genre,
+    session.pages,
+    session.minutes,
+  ]);
+  return [headings, ...rows].map((row) => row.map(escapeCsvCell).join(",")).join("\r\n");
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -122,10 +141,27 @@ function renderSessions(sessions) {
   if (count) count.textContent = `${sessions.length} sessions logged`;
 }
 
+function initSessionExport(sessions) {
+  const button = document.querySelector("#export-sessions");
+  if (!button) return;
+  button.addEventListener("click", () => {
+    const blob = new Blob([buildSessionsCsv(sessions)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "reading-sessions.csv";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  });
+}
+
 function initDashboard() {
   renderSummary(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
+  initSessionExport(readingSessions);
 }
 
 if (typeof document !== "undefined") {
@@ -140,6 +176,8 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    escapeCsvCell,
+    buildSessionsCsv,
   };
 }
 

@@ -13,5 +13,5 @@ npm test
 npm run check
 ```
 
-The starter includes sample reading data, progress cards, session summaries, and a responsive activity table. The app keeps data and calculations in plain JavaScript so future features can remain easy to review and test.
+The dashboard includes sample reading data, progress cards, session summaries, a responsive activity table, and safe CSV export for the reading log. The app keeps data and calculations in plain JavaScript so future features can remain easy to review and test.
 
