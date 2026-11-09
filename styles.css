@@ -153,6 +153,39 @@ main {
   gap: 0.9rem;
 }
 
+.pace-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.pace-card {
+  padding: 1.15rem;
+  border: 1px solid rgba(222, 215, 203, 0.9);
+  border-radius: 1rem;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.pace-card p {
+  margin-bottom: 0.35rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.pace-card strong {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.65rem;
+}
+
+.pace-card span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 .summary-card,
 .book-card,
 .table-shell {
@@ -299,6 +332,10 @@ footer p {
   }
 
   .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pace-grid {
     grid-template-columns: 1fr;
   }
 }

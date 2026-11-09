@@ -44,6 +44,32 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function sessionPace(session) {
+  const pages = Math.max(Number(session?.pages) || 0, 0);
+  const minutes = Math.max(Number(session?.minutes) || 0, 0);
+  return minutes ? Math.round((pages * 60) / minutes) : 0;
+}
+
+function summarizeReadingPace(sessions) {
+  const safeSessions = Array.isArray(sessions) ? sessions : [];
+  const timedTotals = safeSessions.reduce((totals, session) => {
+    const minutes = Math.max(Number(session.minutes) || 0, 0);
+    if (!minutes) return totals;
+    return {
+      pages: totals.pages + Math.max(Number(session.pages) || 0, 0),
+      minutes: totals.minutes + minutes,
+    };
+  }, { pages: 0, minutes: 0 });
+  const fastest = safeSessions.reduce((best, session) => {
+    const pace = sessionPace(session);
+    return pace > (best?.pace || 0) ? { title: session.title || "Untitled", pace } : best;
+  }, null);
+  return {
+    overall: timedTotals.minutes ? Math.round((timedTotals.pages * 60) / timedTotals.minutes) : 0,
+    fastest,
+  };
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -99,6 +125,22 @@ function renderCurrentReads(books) {
   });
 }
 
+function renderPace(sessions) {
+  const container = document.querySelector("#pace-grid");
+  if (!container) return;
+  const summary = summarizeReadingPace(sessions);
+  container.replaceChildren();
+  const overall = createElement("article", "pace-card");
+  overall.append(createElement("p", "", "Overall reading pace"));
+  overall.append(createElement("strong", "", `${summary.overall} pages/hour`));
+  overall.append(createElement("span", "", "Weighted by total reading time"));
+  const fastest = createElement("article", "pace-card");
+  fastest.append(createElement("p", "", "Fastest session"));
+  fastest.append(createElement("strong", "", `${summary.fastest?.pace || 0} pages/hour`));
+  fastest.append(createElement("span", "", summary.fastest?.title || "No timed sessions yet"));
+  container.append(overall, fastest);
+}
+
 function renderSessions(sessions) {
   const body = document.querySelector("#session-rows");
   const count = document.querySelector("#session-count");
@@ -116,6 +158,7 @@ function renderSessions(sessions) {
       createElement("td", "", session.genre),
       createElement("td", "", String(session.pages)),
       createElement("td", "", formatMinutes(session.minutes)),
+      createElement("td", "", `${sessionPace(session)} p/h`),
     );
     body.append(row);
   });
@@ -124,6 +167,7 @@ function renderSessions(sessions) {
 
 function initDashboard() {
   renderSummary(readingSessions);
+  renderPace(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
 }
@@ -140,6 +184,8 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    sessionPace,
+    summarizeReadingPace,
   };
 }
 
