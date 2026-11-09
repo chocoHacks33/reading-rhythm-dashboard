@@ -6,6 +6,8 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  sessionPace,
+  summarizeReadingPace,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +49,26 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("calculates a safe session pace in pages per hour", () => {
+  assert.equal(sessionPace({ pages: 30, minutes: 45 }), 40);
+  assert.equal(sessionPace({ pages: 10, minutes: 0 }), 0);
+  assert.equal(sessionPace({ pages: -4, minutes: 20 }), 0);
+});
+
+test("summarizes weighted pace and the fastest session", () => {
+  assert.deepEqual(
+    summarizeReadingPace([
+      { title: "Slow Book", pages: 20, minutes: 60 },
+      { title: "Quick Book", pages: 30, minutes: 30 },
+    ]),
+    { overall: 33, fastest: { title: "Quick Book", pace: 60 } },
+  );
+  assert.deepEqual(summarizeReadingPace(null), { overall: 0, fastest: null });
+  assert.deepEqual(
+    summarizeReadingPace([{ title: "Untimed", pages: 50, minutes: 0 }]),
+    { overall: 0, fastest: null },
+  );
 });
 
