@@ -44,6 +44,16 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function filterSessions(sessions, query) {
+  const safeSessions = Array.isArray(sessions) ? sessions : [];
+  const normalizedQuery = String(query || "").trim().toLocaleLowerCase();
+  if (!normalizedQuery) return [...safeSessions];
+  return safeSessions.filter((session) =>
+    [session.title, session.author, session.genre]
+      .some((value) => String(value || "").toLocaleLowerCase().includes(normalizedQuery)),
+  );
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -126,6 +136,13 @@ function initDashboard() {
   renderSummary(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
+  const search = document.querySelector("#session-search");
+  const status = document.querySelector("#search-status");
+  search?.addEventListener("input", () => {
+    const matches = filterSessions(readingSessions, search.value);
+    renderSessions(matches);
+    if (status) status.textContent = search.value.trim() ? `${matches.length} matching sessions` : "";
+  });
 }
 
 if (typeof document !== "undefined") {
@@ -140,6 +157,7 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    filterSessions,
   };
 }
 
