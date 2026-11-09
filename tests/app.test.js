@@ -6,6 +6,7 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  formatPrintDate,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +48,10 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("formats print report dates with a year", () => {
+  assert.match(formatPrintDate(new Date("2026-11-09T12:00:00Z")), /9 Nov 2026/);
+  assert.equal(formatPrintDate("not-a-date"), "Unknown date");
 });
 

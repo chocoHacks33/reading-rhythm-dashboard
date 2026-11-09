@@ -118,6 +118,37 @@ footer {
   text-align: right;
 }
 
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.print-button {
+  padding: 0.72rem 0.9rem;
+  border: 1px solid var(--green);
+  border-radius: 0.7rem;
+  background: var(--green);
+  color: white;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.print-button:hover {
+  background: var(--ink);
+}
+
+.print-button:focus-visible {
+  outline: 3px solid rgba(47, 111, 84, 0.3);
+  outline-offset: 2px;
+}
+
+.print-stamp {
+  display: none;
+}
+
 .week-badge span {
   display: block;
   color: var(--muted);
@@ -289,6 +320,11 @@ footer p {
     text-align: left;
   }
 
+  .header-tools {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+
   .section-heading {
     align-items: start;
     flex-direction: column;
@@ -300,6 +336,68 @@ footer p {
 
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  @page {
+    margin: 1.4cm;
+  }
+
+  body {
+    min-width: 0;
+    background: white;
+    color: black;
+    font-size: 10pt;
+  }
+
+  .site-header,
+  main,
+  footer {
+    width: 100%;
+  }
+
+  .site-header {
+    padding: 0 0 1.2rem;
+  }
+
+  .print-button,
+  .skip-link {
+    display: none;
+  }
+
+  main {
+    gap: 1.5rem;
+  }
+
+  .summary-card,
+  .book-card,
+  .table-shell {
+    border-color: #aaa;
+    box-shadow: none;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .book-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .book-card,
+  .summary-card,
+  tr {
+    break-inside: avoid;
+  }
+
+  footer {
+    padding: 1.5rem 0 0;
+  }
+
+  .print-stamp {
+    display: block;
+    margin-top: 0.25rem;
   }
 }
 
