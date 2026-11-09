@@ -6,6 +6,7 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  filterSessions,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +48,23 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("filters sessions across book, author, and genre fields", () => {
+  const sessions = [
+    { title: "Sea of Tranquility", author: "Emily St. John Mandel", genre: "Fiction" },
+    { title: "Entangled Life", author: "Merlin Sheldrake", genre: "Science" },
+  ];
+  assert.deepEqual(filterSessions(sessions, "tranquil"), [sessions[0]]);
+  assert.deepEqual(filterSessions(sessions, "MERLIN"), [sessions[1]]);
+  assert.deepEqual(filterSessions(sessions, "science"), [sessions[1]]);
+});
+
+test("returns all sessions for a blank search without mutating input", () => {
+  const sessions = [{ title: "A Book" }];
+  const result = filterSessions(sessions, "  ");
+  assert.deepEqual(result, sessions);
+  assert.notEqual(result, sessions);
+  assert.deepEqual(filterSessions(null, "book"), []);
 });
 
