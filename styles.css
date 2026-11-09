@@ -147,6 +147,33 @@ main {
   text-align: right;
 }
 
+.session-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-bottom: 0.9rem;
+}
+
+.session-toolbar label {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.session-toolbar select {
+  padding: 0.65rem 2.2rem 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.session-toolbar select:focus-visible {
+  outline: 3px solid rgba(47, 111, 84, 0.3);
+  outline-offset: 2px;
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -300,6 +327,11 @@ footer p {
 
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .session-toolbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

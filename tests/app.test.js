@@ -6,6 +6,7 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  sortSessions,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +48,24 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("sorts sessions by date, pages, and duration", () => {
+  const sessions = [
+    { date: "2026-11-01", pages: 45, minutes: 30 },
+    { date: "2026-11-03", pages: 20, minutes: 70 },
+    { date: "2026-11-02", pages: 35, minutes: 40 },
+  ];
+  assert.deepEqual(sortSessions(sessions, "date-asc").map((item) => item.date), ["2026-11-01", "2026-11-02", "2026-11-03"]);
+  assert.deepEqual(sortSessions(sessions, "pages-desc").map((item) => item.pages), [45, 35, 20]);
+  assert.deepEqual(sortSessions(sessions, "minutes-desc").map((item) => item.minutes), [70, 40, 30]);
+});
+
+test("session sorting leaves the source data unchanged", () => {
+  const sessions = [{ date: "2026-11-01" }, { date: "2026-11-03" }];
+  const result = sortSessions(sessions, "date-desc");
+  assert.deepEqual(result.map((item) => item.date), ["2026-11-03", "2026-11-01"]);
+  assert.deepEqual(sessions.map((item) => item.date), ["2026-11-01", "2026-11-03"]);
+  assert.deepEqual(sortSessions(null), []);
 });
 
