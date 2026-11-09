@@ -44,6 +44,16 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function formatPrintDate(dateValue) {
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "Unknown date";
+  return new Intl.DateTimeFormat("en-SG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -126,6 +136,10 @@ function initDashboard() {
   renderSummary(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
+  const printButton = document.querySelector("#print-report");
+  const printStamp = document.querySelector("#print-stamp");
+  if (printStamp) printStamp.textContent = `Report prepared ${formatPrintDate(new Date())}`;
+  printButton?.addEventListener("click", () => window.print());
 }
 
 if (typeof document !== "undefined") {
@@ -140,6 +154,7 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    formatPrintDate,
   };
 }
 
