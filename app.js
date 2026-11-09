@@ -44,6 +44,22 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function sortSessions(sessions, order = "date-desc") {
+  const sorted = Array.isArray(sessions) ? [...sessions] : [];
+  const numeric = (value) => Math.max(Number(value) || 0, 0);
+  const dateValue = (session) => {
+    const timestamp = Date.parse(`${session.date}T12:00:00`);
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  };
+  const comparators = {
+    "date-asc": (a, b) => dateValue(a) - dateValue(b),
+    "pages-desc": (a, b) => numeric(b.pages) - numeric(a.pages),
+    "minutes-desc": (a, b) => numeric(b.minutes) - numeric(a.minutes),
+    "date-desc": (a, b) => dateValue(b) - dateValue(a),
+  };
+  return sorted.sort(comparators[order] || comparators["date-desc"]);
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -125,7 +141,9 @@ function renderSessions(sessions) {
 function initDashboard() {
   renderSummary(readingSessions);
   renderCurrentReads(currentReads);
-  renderSessions(readingSessions);
+  renderSessions(sortSessions(readingSessions));
+  const sort = document.querySelector("#session-sort");
+  sort?.addEventListener("change", () => renderSessions(sortSessions(readingSessions, sort.value)));
 }
 
 if (typeof document !== "undefined") {
@@ -140,6 +158,7 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    sortSessions,
   };
 }
 
