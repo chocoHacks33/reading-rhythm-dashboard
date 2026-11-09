@@ -44,6 +44,23 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat("en-SG", { day: "numeric", month: "short" }).format(date);
 }
 
+function summarizeGenreTime(sessions) {
+  const totals = new Map();
+  (Array.isArray(sessions) ? sessions : []).forEach((session) => {
+    const genre = String(session.genre || "Uncategorized").trim() || "Uncategorized";
+    const minutes = Math.max(Number(session.minutes) || 0, 0);
+    totals.set(genre, (totals.get(genre) || 0) + minutes);
+  });
+  const totalMinutes = [...totals.values()].reduce((total, minutes) => total + minutes, 0);
+  return [...totals.entries()]
+    .map(([genre, minutes]) => ({
+      genre,
+      minutes,
+      percent: totalMinutes ? Math.round((minutes / totalMinutes) * 100) : 0,
+    }))
+    .sort((a, b) => b.minutes - a.minutes || a.genre.localeCompare(b.genre));
+}
+
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
   if (className) element.className = className;
@@ -99,6 +116,27 @@ function renderCurrentReads(books) {
   });
 }
 
+function renderGenreTime(sessions) {
+  const container = document.querySelector("#genre-time-list");
+  if (!container) return;
+  container.replaceChildren();
+  summarizeGenreTime(sessions).forEach((item) => {
+    const row = createElement("div", "genre-time-row");
+    row.append(createElement("p", "genre-time-name", item.genre));
+    const track = createElement("div", "genre-time-track");
+    track.setAttribute("role", "progressbar");
+    track.setAttribute("aria-label", `${item.genre} share of reading time`);
+    track.setAttribute("aria-valuemin", "0");
+    track.setAttribute("aria-valuemax", "100");
+    track.setAttribute("aria-valuenow", String(item.percent));
+    const bar = createElement("div", "genre-time-bar");
+    bar.style.width = `${item.percent}%`;
+    track.append(bar);
+    row.append(track, createElement("p", "genre-time-value", `${formatMinutes(item.minutes)} · ${item.percent}%`));
+    container.append(row);
+  });
+}
+
 function renderSessions(sessions) {
   const body = document.querySelector("#session-rows");
   const count = document.querySelector("#session-count");
@@ -124,6 +162,7 @@ function renderSessions(sessions) {
 
 function initDashboard() {
   renderSummary(readingSessions);
+  renderGenreTime(readingSessions);
   renderCurrentReads(currentReads);
   renderSessions(readingSessions);
 }
@@ -140,6 +179,7 @@ if (typeof module !== "undefined") {
     summarizeSessions,
     formatMinutes,
     formatDate,
+    summarizeGenreTime,
   };
 }
 

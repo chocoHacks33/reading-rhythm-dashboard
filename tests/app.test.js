@@ -6,6 +6,7 @@ const {
   summarizeSessions,
   formatMinutes,
   formatDate,
+  summarizeGenreTime,
 } = require("../app.js");
 
 test("calculates whole-number book progress", () => {
@@ -47,5 +48,26 @@ test("formats durations for minutes and hours", () => {
 test("formats valid dates and handles invalid values", () => {
   assert.match(formatDate("2026-11-07"), /7 Nov/);
   assert.equal(formatDate("not-a-date"), "Unknown date");
+});
+
+test("summarizes reading minutes and shares by genre", () => {
+  assert.deepEqual(
+    summarizeGenreTime([
+      { genre: "Fiction", minutes: 30 },
+      { genre: "Science", minutes: 20 },
+      { genre: "Fiction", minutes: 10 },
+    ]),
+    [
+      { genre: "Fiction", minutes: 40, percent: 67 },
+      { genre: "Science", minutes: 20, percent: 33 },
+    ],
+  );
+});
+
+test("genre time handles missing labels and unsafe durations", () => {
+  assert.deepEqual(summarizeGenreTime([{ genre: "", minutes: -4 }]), [
+    { genre: "Uncategorized", minutes: 0, percent: 0 },
+  ]);
+  assert.deepEqual(summarizeGenreTime(null), []);
 });
 
